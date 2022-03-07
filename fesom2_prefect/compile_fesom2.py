@@ -1,0 +1,48 @@
+import os
+
+from prefect import task, Flow, Parameter
+from git import Repo
+
+
+@task
+def download_fesom2(branch, local_location):
+    local_location += "/fesom2"
+    print(f"We will now download and compile FESOM2 for {branch} to {local_location}/fesom2!")
+    Repo.clone_from("https://github.com/FESOM/fesom2", multi_options=[f"-b {branch}",],  to_path=local_location)
+    return local_location
+
+
+@task
+def compile_fesom2_ogcm(fesom_folder):
+    print("Compiling the main FESOM2 Model")
+
+
+@task
+def compile_fesom2_metis(fesom_folder):
+    print("Compiling the METIS FESOM2 Mesh Partitioner")
+
+
+with Flow("Compile Fesom2 Model") as flow:
+    branch = Parameter("Branch Name", default="master")
+    local_location = Parameter("Supercomputer Directory", default=os.getcwd())
+    fesom_folder = download_fesom2(branch, local_location)
+    compile_fesom2_ogcm(fesom_folder)
+
+
+with Flow("Compile Fesom2 Mesh Part") as flow:
+    branch = Parameter("Branch Name", default="master")
+    local_location = Parameter("Supercomputer Directory", default=os.getcwd())
+    fesom_folder = download_fesom2(branch, local_location)
+    compile_fesom2_metis(fesom_folder)
+
+
+with Flow("Compile Fesom2 All") as flow:
+    branch = Parameter("Branch Name", default="master")
+    local_location = Parameter("Supercomputer Directory", default=os.getcwd())
+    fesom_folder = download_fesom2(branch, local_location)
+    compile_fesom2_ogcm(fesom_folder)
+    compile_fesom2_metis(fesom_folder)
+
+
+if __name__ == "__main__":
+    flow.run()

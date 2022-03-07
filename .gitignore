@@ -1,3 +1,7 @@
+# From Paul:
+.envrc
+.direnv/
+# From the template
 *.py[cod]
 
 # C extensions
