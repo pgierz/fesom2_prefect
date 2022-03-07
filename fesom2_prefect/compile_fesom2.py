@@ -1,20 +1,32 @@
 import os
 
-from prefect import task, Flow, Parameter
 from git import Repo
+from prefect import Flow, Parameter, task
+from prefect.tasks import ShellTask
 
 
 @task
 def download_fesom2(branch, local_location):
     local_location += "/fesom2"
-    print(f"We will now download and compile FESOM2 for {branch} to {local_location}/fesom2!")
-    Repo.clone_from("https://github.com/FESOM/fesom2", multi_options=[f"-b {branch}",],  to_path=local_location)
+    print(
+        f"We will now download and compile FESOM2 for {branch} to {local_location}/fesom2!"
+    )
+    Repo.clone_from(
+        "https://github.com/FESOM/fesom2",
+        multi_options=[
+            f"-b {branch}",
+        ],
+        to_path=local_location,
+    )
     return local_location
 
 
 @task
 def compile_fesom2_ogcm(fesom_folder):
     print("Compiling the main FESOM2 Model")
+    task = ShellTask(helper_script=f"cd {fesom_folder}/fesom2")
+    modules_loaded = task.run("module list", return_all=True)
+    print(modules_loaded)
 
 
 @task
