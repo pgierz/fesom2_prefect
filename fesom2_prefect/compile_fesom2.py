@@ -1,5 +1,6 @@
 import os
 
+import prefect
 from git import Repo
 from prefect import Flow, Parameter, task
 from prefect.tasks.shell import ShellTask
@@ -23,10 +24,11 @@ def download_fesom2(branch, local_location):
 
 @task
 def compile_fesom2_ogcm(fesom_folder):
-    print("Compiling the main FESOM2 Model")
+    logger = prefect.context.get("logger")
+    logger.info("Compiling the main FESOM2 Model")
     task = ShellTask(helper_script=f"cd {fesom_folder}/fesom2", return_all=True)
     modules_loaded = task.run(command="module list")
-    print(modules_loaded)
+    logger.info(modules_loaded)
 
 
 @task
