@@ -24,8 +24,8 @@ def download_fesom2(branch, local_location):
 @task
 def compile_fesom2_ogcm(fesom_folder):
     print("Compiling the main FESOM2 Model")
-    task = ShellTask(helper_script=f"cd {fesom_folder}/fesom2")
-    modules_loaded = task.run("module list", return_all=True)
+    task = ShellTask(helper_script=f"cd {fesom_folder}/fesom2", return_all=True)
+    modules_loaded = task.run("module list")
     print(modules_loaded)
 
 
